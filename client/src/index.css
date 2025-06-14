@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #4f46e5;
+  --secondary: #ec4899;
+  --bg-light: #f3f4f6;
+  --bg-dark: #111827;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-bg-dark: rgba(31, 41, 55, 0.8);
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300;
+}
+
+.glass-card {
+  @apply bg-white bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-600 hover:to-pink-600 transition-all duration-300;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300;
+}
+
+.ql-editor {
+  min-height: 300px;
+  @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg;
+}
+
+.ql-toolbar {
+  @apply bg-gray-100 dark:bg-gray-700 rounded-t-lg;
+}
