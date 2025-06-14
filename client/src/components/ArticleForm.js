@@ -1,4 +1,3 @@
-// frontend/src/components/ArticleForm.js
 import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -10,7 +9,8 @@ function ArticleForm({ onClose }) {
     category: '',
     tags: '',
     authorName: '',
-    authorEmail: ''
+    authorEmail: '',
+    featuredImage: null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
@@ -35,35 +35,82 @@ function ArticleForm({ onClose }) {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setSubmitStatus({ type: 'error', message: 'Image size must be less than 5MB' });
+        return;
+      }
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        setSubmitStatus({ type: 'error', message: 'Only JPEG and PNG images are allowed' });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          featuredImage: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleContentChange = (value) => {
+    // Strip HTML tags to count plain text length
+    const plainText = value.replace(/<[^>]+>/g, '');
+    if (plainText.length > 10000) {
+      setSubmitStatus({ type: 'error', message: 'Content exceeds 10,000 characters. Please shorten your article.' });
+      return;
+    }
+    setFormData(prev => ({ ...prev, content: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
+    const plainText = formData.content.replace(/<[^>]+>/g, '');
+    if (plainText.length < 100) {
+      setSubmitStatus({ type: 'error', message: 'Article content must be at least 100 characters.' });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.title || !formData.content || !formData.category || !formData.authorName || !formData.authorEmail) {
+      setSubmitStatus({ type: 'error', message: 'All required fields must be filled.' });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      console.log('Submitting:', formData);
-      const response = await fetch('http://localhost:5000/api/articles', {
+      const response = await fetch('http://localhost:5001/api/articles/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+          title: formData.title,
+          content: formData.content,
+          category: formData.category,
+          tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+          authorName: formData.authorName,
+          authorEmail: formData.authorEmail,
+          featuredImage: formData.featuredImage
         }),
       });
 
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (response.ok) {
         setSubmitStatus({ type: 'success', message: 'Article submitted successfully! It will be reviewed by our moderators.' });
-        setFormData({ title: '', content: '', category: '', tags: '', authorName: '', authorEmail: '' });
+        setFormData({ title: '', content: '', category: '', tags: '', authorName: '', authorEmail: '', featuredImage: null });
         setTimeout(onClose, 2000);
       } else {
         setSubmitStatus({ type: 'error', message: data.message || 'Submission failed. Please try again.' });
       }
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('Fetch error:', error);
       setSubmitStatus({ type: 'error', message: 'Network error. Please check your connection and try again.' });
     } finally {
       setIsSubmitting(false);
@@ -162,15 +209,35 @@ function ArticleForm({ onClose }) {
           </div>
 
           <div>
+            <label htmlFor="featuredImage" className="block text-sm font-medium text-gray-700">Featured Image</label>
+            <input
+              type="file"
+              id="featuredImage"
+              name="featuredImage"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 p-2"
+            />
+            <p className="text-gray-500 text-sm mt-1">Upload a featured image for your article (optional, max 5MB, JPEG/PNG).</p>
+          </div>
+
+          <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700">Article Content *</label>
             <ReactQuill
               value={formData.content}
-              onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+              onChange={handleContentChange}
               className="mt-1 border-gray-300 rounded-md"
               placeholder="Write your article content here..."
-              required
+              modules={{
+                toolbar: [
+                  [{ header: [1, 2, false] }],
+                  ['bold', 'italic', 'underline'],
+                  ['link', 'image'],
+                  ['clean']
+                ]
+              }}
             />
-            <p className="text-gray-500 text-sm mt-1">Minimum 100 words required.</p>
+            <p className="text-gray-500 text-sm mt-1">Minimum 100 characters, maximum 10,000 characters.</p>
           </div>
 
           <div className="flex justify-end space-x-4">
@@ -196,7 +263,7 @@ function ArticleForm({ onClose }) {
             <ul className="text-gray-600 text-sm list-disc pl-5">
               <li>All articles are subject to moderation.</li>
               <li>Content must be original and well-researched.</li>
-              <li>Minimum 100 words required.</li>
+              <li>Minimum 100 characters, maximum 10,000 characters.</li>
               <li>Email notifications will be sent for status updates.</li>
             </ul>
           </div>
