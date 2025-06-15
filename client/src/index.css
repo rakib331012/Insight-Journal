@@ -3,36 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --primary: #4f46e5;
+  --primary: #b3b0e2;
   --secondary: #ec4899;
   --bg-light: #f3f4f6;
-  --bg-dark: #111827;
+  --bg-dark: #9bafdd;
   --card-bg: rgba(255, 255, 255, 0.8);
-  --card-bg-dark: rgba(31, 41, 55, 0.8);
+  --card-bg-dark: rgba(170, 192, 224, 0.8);
 }
 
 body {
   font-family: 'Poppins', sans-serif;
-  @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300;
+  @apply bg-bg-light text-text-primary dark:bg-bg-dark dark:text-text-dark-mode transition-colors duration-300;
+  font-size: 1rem; /* Base size from tailwind.config.js */
 }
 
 .glass-card {
-  @apply bg-white bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
+  @apply bg-card-bg dark:bg-card-bg-dark backdrop-blur-lg rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
 }
 
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-600 hover:to-pink-600 transition-all duration-300;
+  @apply bg-gradient-to-r from-indigo-500 to-secondary text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-600 hover:to-secondary transition-all duration-300;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300;
+  @apply bg-gray-200 dark:bg-gray-700 text-text-primary dark:text-text-dark-mode px-4 py-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300;
 }
 
 .ql-editor {
   min-height: 300px;
-  @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg;
+  @apply bg-white dark:bg-gray-800 text-text-primary dark:text-text-dark-mode rounded-lg border border-gray-300 dark:border-gray-600;
 }
 
 .ql-toolbar {
-  @apply bg-gray-100 dark:bg-gray-700 rounded-t-lg;
+  @apply bg-gray-100 dark:bg-gray-700 rounded-t-lg border-b border-gray-300 dark:border-gray-600;
 }
