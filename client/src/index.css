@@ -4,7 +4,7 @@
 
 :root {
   --primary: #4f46e5;
-  --secondary: #ec4899;
+  --secondary: #db2777; /* was #ec4899 */
   --bg-light: #f3f4f6;
   --bg-dark: #111827;
   --card-bg: rgba(255, 255, 255, 0.8);
@@ -21,7 +21,7 @@ body {
 }
 
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-600 hover:to-pink-600 transition-all duration-300;
+  @apply bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-5 py-3 rounded-full font-semibold hover:from-indigo-600 hover:to-pink-600 transition-all duration-300; /* px-6 → px-5 */
 }
 
 .btn-secondary {
