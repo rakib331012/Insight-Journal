@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import ArticleForm from './components/ArticleForm';
 import ModeratorDashboard from './components/ModeratorDashboard';
 import ArticleDetail from './components/ArticleDetail';
+import LoginForm from './components/LoginForm';
 import parse from 'html-react-parser';
 
 function App() {
@@ -11,8 +12,17 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showForm, setShowForm] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser] = useState({ token: null, role: null });
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    if (token && role) {
+      setUser({ token, role });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
     const fetchArticles = async () => {
       try {
         const res = await axios.get('http://localhost:5001/api/articles');
@@ -25,6 +35,20 @@ function App() {
     };
     fetchArticles();
   }, []);
+
+  const handleLogin = (token, role) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('role', role);
+    setUser({ token, role });
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    setUser({ token: null, role: null });
+    delete axios.defaults.headers.common['Authorization'];
+  };
 
   const filteredArticles = selectedCategory === 'All'
     ? articles
@@ -44,8 +68,25 @@ function App() {
               >
                 Submit Article
               </button>
-              <Link to="/moderation" className="text-white hover:text-green-300">Moderation</Link>
-              <Link to="/analytics" className="text-white hover:text-green-300 ml-4">Analytics</Link>
+              {user.token && ['moderator', 'admin'].includes(user.role) && (
+                <Link to="/moderation" className="text-white hover:text-green-300 mr-4">Moderation</Link>
+              )}
+              <Link to="/analytics" className="text-white hover:text-green-300 mr-4">Analytics</Link>
+              {user.token ? (
+                <button
+                  onClick={handleLogout}
+                  className="text-white hover:text-green-300"
+                >
+                  Logout
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="text-white hover:text-green-300"
+                >
+                  Login
+                </button>
+              )}
             </div>
           </div>
         </nav>
@@ -108,7 +149,16 @@ function App() {
                 </>
               }
             />
-            <Route path="/moderation" element={<ModeratorDashboard />} />
+            <Route
+              path="/moderation"
+              element={
+                user.token && ['moderator', 'admin'].includes(user.role) ? (
+                  <ModeratorDashboard />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              }
+            />
             <Route path="/article/:id" element={<ArticleDetail />} />
           </Routes>
         </main>
@@ -116,6 +166,12 @@ function App() {
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <ArticleForm onClose={() => setShowForm(false)} />
+          </div>
+        )}
+
+        {showLogin && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <LoginForm onClose={() => setShowLogin(false)} onLogin={handleLogin} />
           </div>
         )}
       </div>

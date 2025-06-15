@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import parse from 'html-react-parser';
 
 const ModeratorDashboard = () => {
@@ -10,14 +11,14 @@ const ModeratorDashboard = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/moderation/submissions');
-        const data = await response.json();
+        const response = await axios.get('http://localhost:5001/api/moderation/submissions');
+        const data = response.data;
         setSubmissions(data.map(sub => ({
           ...sub,
           _id: sub._id.$oid || sub._id
         })));
       } catch (err) {
-        setError('Failed to fetch submissions');
+        setError(err.response?.data?.message || 'Failed to fetch submissions');
         console.error(err);
       } finally {
         setLoading(false);
@@ -28,21 +29,12 @@ const ModeratorDashboard = () => {
 
   const handleAction = async (id, action, comment = '') => {
     try {
-      const response = await fetch(`http://localhost:5001/api/moderation/${id}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment }),
-      });
-      if (response.ok) {
-        setSubmissions(submissions.filter(sub => sub._id !== id));
-        alert(`Submission ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
-      } else {
-        const data = await response.json();
-        alert(data.message || 'Action failed');
-      }
+      await axios.post(`http://localhost:5001/api/moderation/${id}/${action}`, { comment });
+      setSubmissions(submissions.filter(sub => sub._id !== id));
+      alert(`Submission ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
     } catch (err) {
       console.error(err);
-      alert('Network error occurred');
+      alert(err.response?.data?.message || 'Network error occurred');
     }
   };
 
