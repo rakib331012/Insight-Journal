@@ -12,6 +12,7 @@ function ArticleForm({ onClose }) {
     authorEmail: '',
     featuredImage: null
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
@@ -26,6 +27,8 @@ function ArticleForm({ onClose }) {
     { value: 'politics', label: 'Politics' },
     { value: 'economics', label: 'Economics' }
   ];
+
+  const stripHtml = (html) => html.replace(/<[^>]+>/g, '');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,8 +61,7 @@ function ArticleForm({ onClose }) {
   };
 
   const handleContentChange = (value) => {
-    // Strip HTML tags to count plain text length
-    const plainText = value.replace(/<[^>]+>/g, '');
+    const plainText = stripHtml(value);
     if (plainText.length > 10000) {
       setSubmitStatus({ type: 'error', message: 'Content exceeds 10,000 characters. Please shorten your article.' });
       return;
@@ -72,32 +74,39 @@ function ArticleForm({ onClose }) {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    const plainText = formData.content.replace(/<[^>]+>/g, '');
+    const plainText = stripHtml(formData.content);
     if (plainText.length < 100) {
       setSubmitStatus({ type: 'error', message: 'Article content must be at least 100 characters.' });
       setIsSubmitting(false);
       return;
     }
 
-    if (!formData.title || !formData.content || !formData.category || !formData.authorName || !formData.authorEmail) {
-      setSubmitStatus({ type: 'error', message: 'All required fields must be filled.' });
+    const missingFields = [];
+    if (!formData.title) missingFields.push('Title');
+    if (!formData.content) missingFields.push('Content');
+    if (!formData.category) missingFields.push('Category');
+    if (!formData.authorName) missingFields.push('Your Name');
+    if (!formData.authorEmail) missingFields.push('Email');
+
+    if (missingFields.length > 0) {
+      setSubmitStatus({ type: 'error', message: `Please fill in: ${missingFields.join(', ')}` });
       setIsSubmitting(false);
       return;
     }
+
+    const cleanedData = {
+      ...formData,
+      title: formData.title.trim(),
+      authorName: formData.authorName.trim(),
+      authorEmail: formData.authorEmail.trim(),
+      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+    };
 
     try {
       const response = await fetch('http://localhost:5001/api/articles/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          content: formData.content,
-          category: formData.category,
-          tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-          authorName: formData.authorName,
-          authorEmail: formData.authorEmail,
-          featuredImage: formData.featuredImage
-        }),
+        body: JSON.stringify(cleanedData),
       });
 
       const data = await response.json();
@@ -126,7 +135,7 @@ function ArticleForm({ onClose }) {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Submit New Article</h2>
-          <button className="text-gray-500 hover:text-gray-700" onClick={onClose}>×</button>
+          <button aria-label="Close form" className="text-gray-500 hover:text-gray-700" onClick={onClose}>×</button>
         </div>
 
         {submitStatus && (
@@ -218,7 +227,10 @@ function ArticleForm({ onClose }) {
               onChange={handleFileChange}
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 p-2"
             />
-            <p className="text-gray-500 text-sm mt-1">Upload a featured image for your article (optional, max 5MB, JPEG/PNG).</p>
+            <p className="text-gray-500 text-sm mt-1">Upload a featured image (optional, max 5MB, JPEG/PNG).</p>
+            {formData.featuredImage && (
+              <img src={formData.featuredImage} alt="Preview" className="mt-2 max-h-48 rounded shadow" />
+            )}
           </div>
 
           <div>
@@ -254,7 +266,10 @@ function ArticleForm({ onClose }) {
               className="btn-primary px-4 py-2"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Article'}
+              <>
+                {isSubmitting && <span className="animate-spin mr-2">⏳</span>}
+                {isSubmitting ? 'Submitting...' : 'Submit Article'}
+              </>
             </button>
           </div>
 
