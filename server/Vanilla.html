@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insight Journal</title>
+  <style>
+    /* Base reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background-color: #343a40;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      background-color: #495057;
+    }
+
+    nav a {
+      padding: 1rem;
+      color: white;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #343a40;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .articles {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .articles {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .articles {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .card-content h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-content p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    footer {
+      background-color: #343a40;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Insight Journal</h1>
+    <p>Your daily dose of curated news</p>
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">World</a>
+    <a href="#">Technology</a>
+    <a href="#">Business</a>
+    <a href="#">Health</a>
+  </nav>
+
+  <div class="container">
+    <div class="articles">
+      <div class="card">
+        <img src="https://source.unsplash.com/400x200/?news" alt="News Image">
+        <div class="card-content">
+          <h2>Breaking: Major Event Unfolds</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi vitae erat at lacus pretium imperdiet.</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://source.unsplash.com/400x200/?technology" alt="Tech">
+        <div class="card-content">
+          <h2>Tech: AI is Changing the World</h2>
+          <p>Aliquam erat volutpat. Quisque porta convallis nulla, a luctus justo dignissim sit amet.</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://source.unsplash.com/400x200/?finance" alt="Business">
+        <div class="card-content">
+          <h2>Finance: Market Hits New High</h2>
+          <p>Donec tristique sapien sit amet ante hendrerit, vitae euismod leo elementum.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Insight Journal. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
